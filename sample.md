@@ -1,0 +1,37 @@
+```
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+          slice ds = get_data().begin_parse();
+          cell link = ds~load_ref(); ;; Ячейка содержащаяя ссылку в формате https://github.com/ton-link/ton-link-contract-v3/blob/new-tests/typescript/source/lib/link-format.md
+          
+          ;;var orig_msg = begin_cell().end_cell(); ;; Оригинальное сообщение (может находится любая информация)
+          
+          var orig_msg = begin_cell()
+                 .store_uint(10, 32)
+                 .store_uint(199, 64)
+                 .store_uint(1, 1)
+          .end_cell(); ;; Пример
+          
+          var msg_body = begin_cell()
+                .store_uint(op::transfer(), 32)
+                .store_uint(50, 64) ;; Код для создания работы
+                .store_grams(60000000000) 
+                .store_slice(jetton_wallet_oracle) ;; Адрес жетон валета оракула
+                .store_slice(oracle) ;; Адрес оракула
+                .store_ref(new_dict())
+                .store_grams(120000000) ;; Минимум 0.12 Тон на запрос
+                .store_ref(orig_msg) ;; Оригинальное сообщение
+                .store_ref(link) ;; Ссылка
+        .end_cell();
+
+        var msg = begin_cell()
+              .store_uint(0x18, 6)
+              .store_slice(jettonWallet) ;; Жетон валет смарт-контракта
+              .store_grams(0)
+              .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+              .store_ref(msg_body)
+        .end_cell();
+        send_raw_message(msg, 64);
+        return ();
+
+}
+```
